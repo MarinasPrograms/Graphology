@@ -1,0 +1,67 @@
+using System.Collections.Generic;
+using System.IO;
+using Graphology;
+
+namespace CreateLists
+{
+    class AdditionalProgram
+    {
+
+        static void Main(string[] args)
+        {
+
+            const string parametres = "Parametrs";
+            const string traits = "Traits";
+
+            StreamReader istok = new StreamReader("Istok.txt");
+
+            string str = istok.ReadLine();
+
+            List<Trait> _traits = new List<Trait>();
+            Dictionary<string, Trait> dictTraits = new Dictionary<string,Trait>();
+
+            Dictionary<string, int> _parametres = new Dictionary<string, int>();
+
+            while (str != "endall")
+            {
+
+                string a = istok.ReadLine();
+
+                int z = 0;
+                int t = 0;
+
+                while (a != "end")
+                {
+
+                    if (a[0]=='!')
+                    {
+                        t = z;
+                        a = a.TrimStart('!');
+                    }
+                    
+                    Trait newTrait = new Trait(a);
+                    if (!dictTraits.ContainsKey(a))
+                    {
+                        dictTraits.Add(a, newTrait);
+                    }
+                    dictTraits[a].formula.Add(new TraitAdditionPair(str, z));
+             
+                    z++;
+
+                    a = istok.ReadLine();
+                }
+
+                _parametres.Add(str, t);
+
+                str = istok.ReadLine();
+
+            }
+
+            _traits.AddRange(dictTraits.Values);
+
+            WorkWithFiles.Serialise<List<Trait>>(_traits, traits);
+            WorkWithFiles.SerialiseDictionary<string, int>(_parametres, parametres);
+
+        }
+    }
+}
