@@ -1,0 +1,106 @@
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Xml;
+using System.Xml.Serialization;
+
+namespace Graphology
+{
+
+    public static class WorkWithFiles
+    {
+
+
+        [Serializable]
+        public class DictionaryItem<Tkey, TValue>
+        {
+
+            public Tkey key;
+            public TValue value;
+
+            public DictionaryItem(Tkey k, TValue v)
+            {
+                key = k;
+                value = v;
+            }
+
+            public DictionaryItem()
+            { }
+
+        }
+
+
+        public static void Serialise<T>(T forSerialise, string file)
+        {
+
+            XmlSerializer serial = new XmlSerializer(typeof(T));
+            FileStream stok = new FileStream(file, FileMode.Create);
+
+            serial.Serialize(stok, forSerialise);
+
+            stok.Close();
+        }
+
+        public static void Deserialise<T>(out T forDeserialise, string file)
+        {
+
+            XmlSerializer serial = new XmlSerializer(typeof(T));
+
+            FileStream istok = new FileStream(file, FileMode.Open);
+            XmlReader istokReader = XmlReader.Create(istok);
+
+            forDeserialise = (T)serial.Deserialize(istokReader);
+
+            istok.Close();
+
+        }
+
+        public static void SerialiseDictionary<TKey, TValue>(Dictionary<TKey, TValue> forSerialise, string file)
+        {
+
+            List<DictionaryItem<TKey, TValue>> listForSerialise = new List<DictionaryItem<TKey, TValue>>();
+            foreach (KeyValuePair<TKey, TValue> item in forSerialise)
+            {
+                DictionaryItem<TKey, TValue> adding = new DictionaryItem<TKey, TValue>(item.Key, item.Value);
+                listForSerialise.Add(adding);
+            }
+
+            Serialise<List<DictionaryItem<TKey, TValue>>>(listForSerialise, file);
+
+        }
+
+        public static void DeserialiseDictionary<TKey, TValue>(out Dictionary<TKey, TValue> forDeserialise, string file)
+        {
+
+            List<DictionaryItem<TKey, TValue>> listForDeserialise = new List<DictionaryItem<TKey, TValue>>();
+
+            Deserialise<List<DictionaryItem<TKey, TValue>>>(out listForDeserialise, file);
+
+            forDeserialise = new Dictionary<TKey, TValue>();
+            foreach (DictionaryItem<TKey, TValue> item in listForDeserialise)
+            {
+                forDeserialise.Add(item.key, item.value);
+            }
+
+        }
+
+        const string parametres = "_parametres";
+
+        public static void SerialisePerson(Person forSerialise, string file)
+        {
+
+            SerialiseDictionary<string, int>(forSerialise._parametres, file + parametres);
+            Serialise<Person>(forSerialise, file);
+
+        }
+
+        public static void DeserialisePerson(out Person forDeserialise, string file)
+        {
+
+            Deserialise<Person>(out forDeserialise, file);
+            DeserialiseDictionary<string, int>(out forDeserialise._parametres, file + parametres);
+
+        }
+
+    }
+}
