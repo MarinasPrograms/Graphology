@@ -1,0 +1,515 @@
+using System;
+using System.Windows.Forms;
+using System.IO;
+
+namespace Graphology
+{      
+
+    public partial class SelectOrCreate : Form
+    {
+        public SelectOrCreate()
+        {
+            InitializeComponent();
+        }
+
+        const string nameList = "Data\\NameList";
+        const string users = "Data\\Users\\";
+        const string parametres = "_parametres";
+
+        Person client;
+
+        private void SelectOrCreate_Load(object sender, EventArgs e)
+        {
+
+            string[] addingList = new string[] {};
+
+            try
+            {
+                WorkWithFiles.Deserialise<string[]>(out addingList, nameList);
+            }
+            catch(System.IO.FileNotFoundException)
+            { }
+
+            Profiles.Items.AddRange(addingList);
+
+        }
+
+        private void Delete()
+        {
+            string[] toDel = new string[Profiles.SelectedItems.Count];
+            Profiles.SelectedItems.CopyTo(toDel, 0);
+            foreach(object name in toDel)
+            {
+
+                File.Delete(users + (string)name);
+                File.Delete(users + (string)name + parametres);
+                
+                Profiles.Items.Remove(name);
+
+            }
+        }
+
+        private void Open ()
+        {
+            if ((Profiles.SelectedItems.Count > 1)) MessageBox.Show("Невозможно открыть несколько результатов сразу. Имейте совесть, выберите что-то одно.");
+            else
+            {
+                if ((Profiles.SelectedItems.Count == 0)) MessageBox.Show("Выберите для начала, что хотите просмотреть.");
+                else
+                {
+                    WorkWithFiles.DeserialisePerson(out client, users+(string)Profiles.SelectedItem);
+
+                    SelectOrCreatePanel.Hide();
+                    ResultPanel.Show();
+                }
+            }
+        }
+
+        private void lookProfile_Click(object sender, EventArgs e)
+        {
+
+            Open();
+
+        }
+
+        private void deleteProfile_Click(object sender, EventArgs e)
+        {
+
+            Delete();
+
+        }
+
+        private void changeProfile_Click(object sender, EventArgs e)
+        {
+
+            if ((Profiles.SelectedItems.Count > 1)) MessageBox.Show("Невозможно изменить несколько результатов сразу. Имейте совесть, выберите что-то одно.");
+            else
+            {
+                if ((Profiles.SelectedItems.Count == 0)) MessageBox.Show("Выберите для начала, что хотите изменить.");
+                else
+                {
+
+                    WorkWithFiles.DeserialisePerson(out client, users + (string)Profiles.SelectedItem);
+
+                    SelectOrCreatePanel.Hide();
+                    HandWritingCreatePanel.Show();
+                }
+            }
+
+        }
+
+        private void Profiles_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Delete) Delete();
+            if (e.KeyCode == Keys.Enter) Open();
+        }  
+
+        private void CreateProfile_Click(object sender, EventArgs e)
+        {
+
+            SelectOrCreatePanel.Hide();
+            CreateProfilePanel.Show();
+
+        }
+
+        private void FromGoodToBad(object sender, EventArgs e)
+        {
+            EyeSightScrollBar.Enabled = !goodSight.Checked;
+            
+        }
+
+        private void SightTryToChange(object sender, ScrollEventArgs e)
+        {
+            double value = EyeSightScrollBar.Value;
+            double digits = value / 4;
+            string digitsString = (digits.ToString());
+            SightInDigit.Show(digitsString, EyeSightScrollBar, 30000);
+
+        }
+
+        private void SightTryToChange(object sender, EventArgs e)
+        {
+            double value = EyeSightScrollBar.Value;
+            double digits = value / 4;
+            string digitsString = (digits.ToString());
+            SightInDigit.Show(digitsString, EyeSightScrollBar, 30000);
+        }
+
+        private void backToBegining_Click(object sender, EventArgs e)
+        {
+
+            CreateProfilePanel.Hide();
+            SelectOrCreatePanel.Show();
+
+        }
+
+        private void EndOfFirstStage(object sender, EventArgs e)
+        {
+
+            if (Profiles.Items.Contains(NikTextBox.Text)) MessageBox.Show("Это имя уже занято, выберите другое");
+            else
+                if ((NikTextBox.Text == "") || 
+                    ((!SelectFemale.Checked) && (!SelectMale.Checked))||
+                    ((!goodSight.Checked)&&(EyeSightScrollBar.Value == 0))) 
+                        MessageBox.Show("Вначале заполните все поля");
+                else
+                {
+
+                    client = new Person(NikTextBox.Text, SelectMale.Checked, EyeSightScrollBar.Enabled ? EyeSightScrollBar.Value : 0);
+                    
+                    CreateProfilePanel.Hide();
+                    HandWritingCreatePanel.Show();
+
+                }
+
+        }
+
+
+            const string same = "Однородность\\неоднородность";
+            const string nit = "Угол\\нитеобразность";
+            const string ar = "Аркада\\гирлянда";
+            const string topZone = "Верхняя зона";
+            const string midZone = "Средняя зона";
+            const string lowZone = "Нижняя зона";
+            const string speed = "Скорость";
+            const string size = "Размер";
+            const string swing = "Размах";
+            const string width = "Ширина";
+            const string topFields = "Верхние поля";
+            const string lowFields = "Нижние поля";
+            const string wBf = "Начальные поля";
+            const string cBf = "Начальные Сужаются\\Расширяются";
+            const string wEf = "Конечные поля";
+            const string cEf = "Конечные Расширяются\\Сужаются";
+            const string depression = "Нажим";
+            const string betweenLetters = "Расстояние между буквами";
+            const string betweenWords = "Расстояние между словами";
+            const string bending = "Наклон";
+            const string stringDirection = "Направление строк";
+
+        private string GetImageLocation()
+        {
+            string location = "Images\\" +
+                              client._parametres[nit] + "." +
+                              client._parametres[ar] + "." +
+                              client._parametres[topZone] + "." +
+                              client._parametres[midZone] + "." +
+                              client._parametres[lowZone] + "." +
+                              client._parametres[same] + "." +
+                              client._parametres[size] + client.Sight + "." +
+                              client._parametres[swing] + "." +
+                              client._parametres[width] + "." +
+                              client._parametres[topFields] + "." +
+                              client._parametres[lowFields] + "." +
+                              client._parametres[wBf] + "." +
+                              client._parametres[cBf] + "." +
+                              client._parametres[wEf] + "." +
+                              client._parametres[cEf] + "." +
+                              client._parametres[depression] + "." +
+                              client._parametres[betweenLetters] + "." +
+                              client._parametres[betweenWords] + "." +
+                              client._parametres[bending] + "." +
+                              client._parametres[stringDirection] + "." +
+                              ".jpg";
+            return (location);
+        }
+
+        private void ChangeImage()
+        {
+            handWritingPicture.ImageLocation = GetImageLocation();
+        }
+
+        private void HandWritingCreatePanel_VisibleChanged(object sender, EventArgs e)
+        {
+
+            SameScrollBar.Value = client._parametres[same];
+            ScrollBarNit.Value = client._parametres[nit];
+            arScrollBar.Value = client._parametres[ar];
+            sizeScrollBar.Value = client._parametres[size];
+            swingScrollBar.Value = client._parametres[swing];
+            widthScrollBar.Value = client._parametres[width];
+            topZoneScrollBar.Value = client._parametres[topZone];
+            middleZoneScrollBar.Value = client._parametres[midZone];
+            lowZoneScrollBar.Value = client._parametres[lowZone];
+            topFieldsScrollBar.Value = client._parametres[topFields];
+            lowFieldsScrollBar.Value = client._parametres[lowFields];
+            widthBeginFieldsScrollBar.Value = client._parametres[wBf];
+            changedBeginFieldsScrollBar.Value = client._parametres[cBf];
+            widthEndFieldsScrollBar.Value = client._parametres[wEf];
+            changedEndFieldsScrollBar.Value = client._parametres[cEf];
+            depressionScrollBar.Value = client._parametres[depression];
+            betweenLettersScrollBar.Value = client._parametres[betweenLetters];
+            betweenWordsScrollBar.Value = client._parametres[betweenWords];
+            bendingScrollBar.Value = client._parametres[bending];
+            stringDirectionScrollBar.Value = client._parametres[stringDirection];
+        }
+
+        private void SameScrollBar_Scroll(object sender, ScrollEventArgs e)
+        {
+            client._parametres[same] = SameScrollBar.Value;
+
+            ChangeImage();
+        }
+
+        private void anglesRadioButton_CheckedChanged(object sender, EventArgs e)
+        {
+            ScrollBarNit.Enabled = anglesRadioButton.Checked;
+            arScrollBar.Enabled = !ScrollBarNit.Enabled;
+        }
+
+        private void nitRadioButton_CheckedChanged(object sender, EventArgs e)
+        {
+            ScrollBarNit.Enabled = nitRadioButton.Checked;
+            arScrollBar.Enabled = !ScrollBarNit.Enabled;
+        }
+
+        private void arRadioButton_CheckedChanged(object sender, EventArgs e)
+        {
+            arScrollBar.Enabled = arRadioButton.Checked;
+            ScrollBarNit.Enabled = !arScrollBar.Enabled;
+        }
+
+        private void girRadioButton_CheckedChanged(object sender, EventArgs e)
+        {
+            arScrollBar.Enabled = girRadioButton.Checked;
+            ScrollBarNit.Enabled = !arScrollBar.Enabled;
+        }
+
+        private void ScrollBarNit_EnabledChanged(object sender, EventArgs e)
+        {
+            client._parametres[nit] = ScrollBarNit.Enabled ? ScrollBarNit.Value : 18;
+            ChangeImage();
+        }
+
+        private void arScrollBar_EnabledChanged(object sender, EventArgs e)
+        {
+            client._parametres[ar] = arScrollBar.Enabled ? arScrollBar.Value : 7;
+            ChangeImage();
+        }
+
+        private void ScrollBarNit_Scroll(object sender, ScrollEventArgs e)
+        {
+            client._parametres[nit] = ScrollBarNit.Value;
+            ChangeImage();
+        }
+
+        private void arScrollBar1_Scroll(object sender, ScrollEventArgs e)
+        {
+            client._parametres[ar] = arScrollBar.Value;
+            ChangeImage();
+        }
+
+        private void TopZoneRadioButton_CheckedChanged(object sender, EventArgs e)
+        {
+            topZoneScrollBar.Enabled = !topZoneScrollBar.Enabled;
+            if (!topZoneScrollBar.Enabled) client._parametres[topZone] = 1;
+            else
+            {
+                client._parametres[topZone] = topZoneScrollBar.Value;
+                ChangeImage();
+            }
+        }
+
+        private void MiddleZoneRadioButton_CheckedChanged(object sender, EventArgs e)
+        {
+            middleZoneScrollBar.Enabled = !middleZoneScrollBar.Enabled;
+            if (!middleZoneScrollBar.Enabled) client._parametres[midZone] = 1;
+            else 
+            {
+                client._parametres[midZone] = middleZoneScrollBar.Value;
+                ChangeImage();
+            }
+        }
+
+        private void LowZoneRadioButton_CheckedChanged(object sender, EventArgs e)
+        {
+            lowZoneScrollBar.Enabled = !lowZoneScrollBar.Enabled;
+            if (!lowZoneScrollBar.Enabled) client._parametres[lowZone] = 1;
+            else
+            {
+                client._parametres[lowZone] = lowZoneScrollBar.Value;
+                ChangeImage();
+            }
+        }
+
+        private void TopZoneScrollBar_Scroll(object sender, ScrollEventArgs e)
+        {
+            client._parametres[topZone] = topZoneScrollBar.Value;
+            ChangeImage();
+        }
+
+        private void middleZoneScrollBar_Scroll(object sender, ScrollEventArgs e)
+        {
+            client._parametres[midZone] = middleZoneScrollBar.Value;
+            ChangeImage();
+        }
+
+        private void lowZoneScrollBar_Scroll(object sender, ScrollEventArgs e)
+        {
+            client._parametres[lowZone] = lowZoneScrollBar.Value;
+            ChangeImage();        
+        }
+
+        private void sizeScrollBar_Scroll(object sender, ScrollEventArgs e)
+        {
+            client._parametres[size] = sizeScrollBar.Value - client.Sight;
+            ChangeImage();
+        }
+
+        private void reachScrollBar_Scroll(object sender, ScrollEventArgs e)
+        {
+            client._parametres[swing] = swingScrollBar.Value;
+            ChangeImage();
+        }
+
+        private void widthScrollBar_Scroll(object sender, ScrollEventArgs e)
+        {
+            client._parametres[width] = widthScrollBar.Value;
+            ChangeImage();
+        }
+
+        private void topFieldsScrollBar_Scroll(object sender, ScrollEventArgs e)
+        {
+            client._parametres[topFields] = topFieldsScrollBar.Value;
+            ChangeImage();
+        }
+
+        private void lowFieldsScrollBar_Scroll(object sender, ScrollEventArgs e)
+        {
+            client._parametres[lowFields] = lowFieldsScrollBar.Value;
+            ChangeImage();
+        }
+
+        private void straightCheckBox_CheckedChanged(object sender, EventArgs e)
+        {
+            changedBeginFieldsScrollBar.Enabled = !straightCheckBox.Checked;
+            client._parametres[cBf] = changedBeginFieldsScrollBar.Enabled ? changedBeginFieldsScrollBar.Value : 10;
+            ChangeImage();
+        }
+
+        private void widthBeginFieldstScrollBar_Scroll(object sender, ScrollEventArgs e)
+        {
+            client._parametres[wBf] = widthBeginFieldsScrollBar.Value;
+            ChangeImage();
+        }
+
+        private void changedBeginingFieldsScrollBar_Scroll(object sender, ScrollEventArgs e)
+        {
+            client._parametres[cBf] = changedBeginFieldsScrollBar.Value;
+            ChangeImage();
+        }
+        
+        private void straightEndCheckBox_CheckedChanged(object sender, EventArgs e)
+        {
+            changedEndFieldsScrollBar.Enabled = !straightEndCheckBox.Checked;
+            client._parametres[cEf] = changedEndFieldsScrollBar.Enabled ? changedEndFieldsScrollBar.Value : 10;
+            ChangeImage();
+        }
+
+        private void widthEndFieldsScrollBar_Scroll(object sender, ScrollEventArgs e)
+        {
+            client._parametres[wEf] = widthEndFieldsScrollBar.Value;
+            ChangeImage();
+        }
+
+        private void changedEndFieldsScrollBar_Scroll(object sender, ScrollEventArgs e)
+        {
+            client._parametres[cEf] = changedEndFieldsScrollBar.Value;
+            ChangeImage();
+        }
+        private void depressionScrollBar_Scroll(object sender, ScrollEventArgs e)
+        {
+            client._parametres[depression] = depressionScrollBar.Value;
+            ChangeImage();
+        }
+
+        private void bendingScrollBar_Scroll(object sender, ScrollEventArgs e)
+        {
+            client._parametres[bending] = bendingScrollBar.Value;
+            ChangeImage();
+        }
+
+        private void stringDirectionScrollBar_Scroll(object sender, ScrollEventArgs e)
+        {
+            client._parametres[stringDirection] = stringDirectionScrollBar.Value;
+            ChangeImage();
+        }
+
+        private void betweenWordsScrollBar_Scroll(object sender, ScrollEventArgs e)
+        {
+            client._parametres[betweenWords] = betweenWordsScrollBar.Value;
+            ChangeImage();
+        }
+
+        private void betweenLettersScrollBar_Scroll(object sender, ScrollEventArgs e)
+        {
+            client._parametres[betweenLetters] = betweenLettersScrollBar.Value;
+            ChangeImage();
+        }
+
+
+
+
+        private void backToFirstStage_Click(object sender, EventArgs e)
+        {
+
+            HandWritingCreatePanel.Hide();
+            CreateProfilePanel.Show();
+
+        }
+
+        private void buttonDone_Click(object sender, EventArgs e)
+        {
+
+            HandWritingCreatePanel.Hide();
+            ResultPanel.Show();
+
+        }
+
+        private void HandWritingCreatePanel_Leave(object sender, EventArgs e)
+        {
+            if (!Profiles.Items.Contains(client.Name))
+                Profiles.Items.Add(client.Name);
+            WorkWithFiles.SerialisePerson(client, users + client.Name);
+        }
+
+        private void ResultPanel_Enter(object sender, EventArgs e)
+        {
+            handWriting.ImageLocation = GetImageLocation();
+            reportText.Text = client.character();
+        }
+
+        private void back_Click(object sender, EventArgs e)
+        {
+
+            ResultPanel.Hide();
+            HandWritingCreatePanel.Show();
+
+        }
+
+        private void backToMainMenu_Click(object sender, EventArgs e)
+        {
+
+            Application.Restart();
+
+        }
+
+        private void close_Click(object sender, EventArgs e)
+        {
+
+            Application.Exit();
+
+        }
+
+        private void SelectOrCreate_FormClosing(object sender, FormClosingEventArgs e)
+        {
+
+            string[] forSerialization = new string[Profiles.Items.Count];
+            Profiles.Items.CopyTo(forSerialization, 0);
+            WorkWithFiles.Serialise<string[]>(forSerialization, nameList);
+
+        }
+  
+
+    }
+}
