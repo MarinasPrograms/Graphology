@@ -1,0 +1,41 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace Graphology
+{
+
+    [Serializable]
+    public class Trait : IComparable
+    {
+
+        public string _name;
+        public int _rating;
+
+        public List<TraitAdditionPair> formula;
+
+        public Trait()
+        {}
+
+        public Trait(string name)
+        {
+            _name = name;
+            _rating = 0;
+            formula = new List<TraitAdditionPair>();
+        }
+
+        public int CompareTo(object obj)
+        {
+            
+            Trait otherTrait = obj as Trait;
+            return(this._rating.CompareTo(otherTrait._rating));
+
+        }
+
+
+
+    }
+
+}
