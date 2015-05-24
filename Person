@@ -1,0 +1,80 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Runtime.Serialization.Formatters.Binary;
+using System.Xml.Serialization;
+
+namespace Graphology
+{
+    [Serializable]
+    public class Person
+    {
+
+        const string parametres = "Parametrs";
+        const string traits = "Traits";
+        const string data = "Data\\";
+
+        private string _name;
+        public string Name
+        {
+            get { return _name; }
+            set { _name = value; }
+        }
+
+        private bool _male; //false - feMale
+
+        private int _sight;//*4
+        public int Sight
+        {
+            get { return _sight; }
+            set { _sight = value; }
+        }
+
+        [XmlIgnoreAttribute()]
+        public Dictionary<string, int> _parametres;
+
+        public Person()
+        {}
+
+        public Person(string name, bool male, int sight)
+        {
+            
+            _name = name;
+            _male = male;
+
+            _sight = sight;
+
+            WorkWithFiles.DeserialiseDictionary<string, int>(out _parametres, data + parametres);
+
+        }
+
+        public string character()
+        {
+
+            List<Trait> _traits;
+            WorkWithFiles.Deserialise<List<Trait>>(out _traits, data + traits);
+
+            foreach (Trait _trait in _traits)
+            {
+
+                foreach (TraitAdditionPair compose in _trait.formula)
+                {
+                    _trait._rating += Math.Abs(compose._position - _parametres[compose._plase]);
+                }
+
+            }
+
+            _traits.Sort();
+
+            string res = this._name + ", вы:\n";
+            for (int i = 1; i <= 20; i++)
+                res += i + ") " + _traits[i - 1]._name + "\n";
+
+            return (res);
+
+        }
+
+    }
+}
