@@ -1,0 +1,30 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace Graphology
+
+{
+
+    [Serializable]
+    public class TraitAdditionPair
+    {
+
+        public string _plase;
+        public int _position;
+
+        public TraitAdditionPair()
+        {
+
+        }
+
+        public TraitAdditionPair(string plase, int position)
+        {
+            _plase = plase;
+            _position = position;
+        }
+
+    }
+}
